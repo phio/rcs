@@ -1,6 +1,9 @@
 if &term =~ '^\(xterm\|screen\)$' && $COLORTERM == 'gnome-terminal' 
 	set t_Co=256 
+elseif  &term =~? '^rxvt' || &term =~? '^screen'
+        set t_Co=256
 endif
+
 colorscheme yytextmate
 :filetype plugin on
 
@@ -124,7 +127,7 @@ if has("cscope")
 
     " check cscope for definition of a symbol before checking ctags: set to 1
     " if you want the reverse search order.
-    set csto=0
+    set csto=1
 
     " add any cscope database in current directory
     if filereadable("cscope.out")
