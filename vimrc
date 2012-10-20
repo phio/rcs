@@ -1,125 +1,205 @@
+" ----------------------
+" Initialization part
+" ----------------------
+" Step 1: git clone https://github.com/gmarik/vundle.git ~/.vim/bundle/vundle
+" Step 2: get my .vimrc
+
+set nocompatible  " This must be first, because it changes other options as side effect
+"filetype off                   " required!
+
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+" let Vundle manage Vundle
+" required! 
+Bundle 'gmarik/vundle'
+
+" vim-scripts repos
+Bundle 'L9'
+Bundle 'FuzzyFinder'
+Bundle 'snipMate'
+Bundle 'matchit.zip'
+Bundle 'ScrollColors' 
+Bundle 'Color-Sampler-Pack'
+Bundle 'SearchComplete'
+Bundle 'taglist.vim'
+
+" github repos
+Bundle 'scrooloose/nerdtree'
+Bundle 'wesleyche/SrcExpl'
+Bundle 'wesleyche/Trinity'
+Bundle 'scrooloose/nerdcommenter'
+Bundle 'tpope/vim-surround'
+Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-repeat'
+Bundle 'tpope/vim-abolish'
+Bundle 'Lokaltog/vim-easymotion'
+Bundle 'ervandew/supertab'
+Bundle 'Raimondi/delimitMate'
+Bundle 'anzaika/go.vim'
+
+" ----------------------
+" Global Options
+" ----------------------
+set hidden        " can have unwritten changes to a file without being forced to write or undo change
+set clipboard+=unnamed  " Yanks go on clipboard instead
+"set nowrap        " don't wrap lines
+set tabstop=4     " a tab is four spaces
+set backspace=indent,eol,start
+                  " allow backspacing over everything in insert mode
+set autoindent    " always set autoindenting on
+set copyindent    " copy the previous indentation on autoindenting
+set cindent
+set cinoptions=:s,ps,ts,cs
+set cinwords=if,else,while,do,for,switch,case
+
+set number        " always show line numbers
+set shiftwidth=4  " number of spaces to use for autoindenting
+set shiftround    " use multiple of shiftwidth when indenting with '<' and '>'
+set showmatch     " set show matching parenthesis
+set ignorecase    " ignore case when searching
+set smartcase     " ignore case if search pattern is all lowercase,
+                  "    case-sensitive otherwise
+set smarttab      " insert tabs on the start of a line according to
+                  "    shiftwidth, not tabstop
+set hlsearch      " highlight search terms
+set incsearch     " show search matches as you type
+set history=1000  " remember more commands and search history
+set undolevels=1000
+		  " use many muchos levels of undo
+set wildignore=*.swp,*.bak,*.pyc,*.class
+set title         " change the terminal's title
+"set visualbell    " don't beep
+set noerrorbells  " don't beep
+set nobackup
+set noswapfile
+set pastetoggle=<F2>
+set wildmode=longest,list " At command line, complete longest common string, then list alternatives.
+"set wildmenu
+set tags=./tags;$HOME
+set encoding=utf-8
+
+set laststatus=2              " always show status line.
+set shortmess=atI             " shortens messages
+set showcmd                   " display an incomplete command in statusline
+set statusline=%<%f\          " custom statusline
+set stl+=[%{&ff}]             " show fileformat
+set stl+=%y%m%r%=
+set stl+=%-14.(%l,%c%V%)\ %P
+
+"filetype plugin indent on
+filetype plugin on
+
+
 if &term =~ '^\(xterm\|screen\)$' && $COLORTERM == 'gnome-terminal' 
-	set t_Co=256 
+  	set t_Co=256 
 elseif  &term =~? '^rxvt' || &term =~? '^screen'
-        set t_Co=256
+    set t_Co=256
 endif
 
-colorscheme yytextmate
-:filetype plugin on
+if &t_Co >= 256 || has("gui_running")
+   	colorscheme wombat256
+endif
 
+if &t_Co > 2 || has("gui_running")
+   	" switch syntax highlighting on, when the terminal has colors
+   	syntax on
+endif
+
+:autocmd ColorScheme * highlight Todo ctermbg=red ctermfg=white
+:autocmd BufWinEnter * match Todo /TODO/
+:autocmd BufWinEnter * match Todo /TODO:/
+:autocmd BufWinEnter * match Todo /FIXME/
+:autocmd BufWinEnter * match Todo /FIXME:/
+:autocmd BufWinEnter * match Todo /XXX/
+:autocmd BufWinEnter * match Todo /MARCO/
+
+" Command and Auto commands " {{{
+" Sudo write
+comm! W exec 'w !sudo tee % > /dev/null' | e!
+
+"Auto commands
+au BufRead,BufNewFile {Gemfile,Rakefile,Capfile,*.rake,config.ru}     set ft=ruby
+au BufRead,BufNewFile {*.md,*.mkd,*.markdown}                         set ft=markdown
+au BufRead,BufNewFile {COMMIT_EDITMSG}                                set ft=gitcommit
+
+" restore position in file
+au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | execute "normal g'\"" | endif 
+
+" ---------------------------------
+" Important Plugin Initialization
+" ---------------------------------
+
+"let Tlist_Use_SingleClick=1
+"let Tlist_Process_File_Always=1
+"let Tlist_Show_Menu=1
+"let Tlist_GainFocus_On_ToggleOpen=1
+"let Tlist_Close_OnSelect=1
+"let Tlist_Inc_Winwidth = 0
+
+let g:SuperTabDefaultCompletionType = "context"
+let g:SuperTabCompletionContexts = ['s:ContextText', 's:ContextDiscover']
+"let g:SuperTabCompletionContexts = ['s:ContextDiscover', 's:ContextText']
+"let g:SuperTabContextTextOmniPrecedence = ['&omnifunc', '&completefunc']
+"let g:SuperTabDefaultCompletionType = "<c-x><c-u>"
+"let g:SuperTabContextDefaultCompletionType="<c-p>"
+"let g:SuperTabContextDiscoverDiscovery =
+"        \ ["&completefunc:<c-x><c-i>", "&omnifunc:<c-x><c-f>"]
+"
+"autocmd FileType *
+"    \   call SuperTabChain(&omnifunc, "<c-x><c-f>") |
+"    \   call SuperTabSetDefaultCompletionType("<c-x><c-i>")
+
+" ----------------------
+" Key Mappings
+" ----------------------
+" change the mapleader from \ to ,
 let mapleader=","
-let g:mapleader=","
-:set pastetoggle=<C-F12>
+
+" Quickly edit/reload the vimrc file
+nmap <silent> <leader>ev :e $MYVIMRC<CR>
+nmap <silent> <leader>sv :so $MYVIMRC<CR>
+
+nnoremap ; :
+nnoremap j gj
+nnoremap k gk
 
 nmap <tab> v>
 nmap <s-tab> v<
 vmap <tab> >gv
 vmap <s-tab> <gv
 
-nmap <C-H> <C-W>h 
-nmap <C-J> <C-W>j 
-nmap <C-K> <C-W>k 
-nmap <C-L> <C-W>l 
+" Use Q for formatting the current paragraph (or selection)
+vmap Q gq
+nmap Q gqap
 
-map <F12> :call Do_CsTag()<CR>
-nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>:copen<CR>
-nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
-nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>:copen<CR>
-nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>:copen<CR>
-nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>:copen<CR>
-nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>:copen<CR>
-nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>:copen<CR>
-nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>:copen<CR>
+" Easy window navigation
+map <C-h> <C-w>h
+map <C-j> <C-w>j
+map <C-k> <C-w>k
+map <C-l> <C-w>l
 
-"let g:SuperTabDefaultCompletionType = "<c-x><c-u>"
-let g:SuperTabDefaultCompletionType = "context"
-"let g:SuperTabContextDefaultCompletionType="<c-p>"
-"let g:SuperTabCompletionContexts = ['s:ContextText', 's:ContextDiscover']
-"let g:SuperTabContextTextOmniPrecedence = ['&omnifunc', '&completefunc']
-"let g:SuperTabContextDiscoverDiscovery =
-	"\ ["&completefunc:<c-x><c-u>", "&omnifunc:<c-x><c-o>"]
+nmap <silent> ,/ :nohlsearch<CR>
 
-" NERDTree setting
-nmap <silent> <leader>nt :NERDTree<cr>
-
-" taglists setting 
-nmap <silent> <leader>tg :TlistToggle<CR> 
-"let Tlist_Use_SingleClick=1 
-"let Tlist_Process_File_Always=1 
-"let Tlist_Show_Menu=1 
-"let Tlist_GainFocus_On_ToggleOpen=1 
-"let Tlist_Close_OnSelect=1 
-"let Tlist_Inc_Winwidth = 0 
+" taglists setting
+nmap <silent> <leader>tg :TlistToggle<CR>
 
 " FuzzyFinder setting
-"nmap <leader>fb :FuzzyFinderBuffer<cr>
-"nmap <leader>ff :FuzzyFinderFile<cr>
-"nmap <leader>fd :FuzzyFinderDir<cr>
-"nmap <leader>fe :FuzzyFinderMruFile<cr>
-"nmap <leader>fc :FuzzyFinderMruCmd<cr>
-"nmap <leader>fm :FuzzyFinderBookmark<cr>
-"nmap <leader>ft :FuzzyFinderTag<cr>
-"nmap <leader>ft :FuzzyFinderTaggedFile<cr>
 nmap <leader>fb :FufBuffer<cr>
 nmap <leader>ff :FufFile<cr>
 nmap <leader>fd :FufDir<cr>
-nmap <leader>fa :FufBookmark<cr>
+nmap <leader>fm :FufBookmark<cr>
+nmap <leader>ft :FufTag<cr>
 
+" Open and close all the three plugins on the same time 
+nmap <F8>   :TrinityToggleAll<CR> 
+" Open and close the srcexpl.vim separately 
+nmap <F9>   :TrinityToggleSourceExplorer<CR> 
+" Open and close the taglist.vim separately 
+nmap <F10>  :TrinityToggleTagList<CR> 
+" Open and close the NERD_tree.vim separately 
+nmap <F11>  :TrinityToggleNERDTree<CR> 
 
-" ============================================================
-" BEGIN: For Trinity and SrcExplorer
-" ============================================================
-" // The switch of the Source Explorer 
-nmap <F8> :TrinityToggleAll<CR> 
-
-" // Set "<F12>" key for updating the tags file artificially 
-let g:SrcExpl_updateTagsKey = "<F12>" 
-
-" // Set the height of Source Explorer window 
-let g:SrcExpl_winHeight = 8 
-
-" // Set 100 ms for refreshing the Source Explorer 
-let g:SrcExpl_refreshTime = 100 
-
-" // Set "Enter" key to jump into the exact definition context 
-let g:SrcExpl_jumpKey = "<ENTER>" 
-
-" // Set "Space" key for back from the definition context 
-let g:SrcExpl_gobackKey = "<SPACE>" 
-
-" // In order to Avoid conflicts, the Source Explorer should know what plugins 
-" // are using buffers. And you need add their bufname into the list below 
-" // according to the command ":buffers!" 
-let g:SrcExpl_pluginList = [ 
-        \ "[fuf]", 
-        \ "__Tag_List__", 
-        \ "_NERD_tree_", 
-        \ "Source_Explorer" 
-    \ ] 
-
-" // Enable/Disable the local definition searching, and note that this is not 
-" // guaranteed to work, the Source Explorer doesn't check the syntax for now. 
-" // It only searches for a match with the keyword according to command 'gd' 
-let g:SrcExpl_searchLocalDef = 1 
-
-" // Do not let the Source Explorer update the tags file when opening 
-let g:SrcExpl_isUpdateTags = 0 
-
-" // Use 'Exuberant Ctags' with '--sort=foldcase -R .' or '-L cscope.files' to 
-" //  create/update a tags file 
-let g:SrcExpl_updateTagsCmd = "ctags --sort=foldcase -R ." 
-" ============================================================
-" END: For Trinity and SrcExplorer
-" ============================================================
-
-
-" ============================================================
-" BEGIN: For cscope
-" ============================================================
-" This tests to see if vim was configured with the '--enable-cscope' option
-" when it was compiled.  If it wasn't, time to recompile vim... 
 if has("cscope")
-
     """"""""""""" Standard cscope/vim boilerplate
 
     " use both cscope and ctag for 'ctrl-]', ':ta', and 'vim -t'
@@ -127,7 +207,7 @@ if has("cscope")
 
     " check cscope for definition of a symbol before checking ctags: set to 1
     " if you want the reverse search order.
-    set csto=1
+    set csto=0
 
     " add any cscope database in current directory
     if filereadable("cscope.out")
@@ -141,61 +221,8 @@ if has("cscope")
     set cscopeverbose  
 endif
 
-function Do_CsTag()
-    let dir = getcwd()
-    if filereadable("tags")
-        if(g:iswindows==1)
-            let tagsdeleted=delete(dir."\\"."tags")
-        else
-            let tagsdeleted=delete("./"."tags")
-        endif
-        if(tagsdeleted!=0)
-            echohl WarningMsg | echo "Fail to do tags! I cannot delete the tags" | echohl None
-            return
-        endif
-    endif
-    if has("cscope")
-        silent! execute "cs kill -1"
-    endif
-    if filereadable("cscope.files")
-        if(g:iswindows==1)
-            let csfilesdeleted=delete(dir."\\"."cscope.files")
-        else
-            let csfilesdeleted=delete("./"."cscope.files")
-        endif
-        if(csfilesdeleted!=0)
-            echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.files" | echohl None
-            return
-        endif
-    endif
-    if filereadable("cscope.out")
-        if(g:iswindows==1)
-            let csoutdeleted=delete(dir."\\"."cscope.out")
-        else
-            let csoutdeleted=delete("./"."cscope.out")
-        endif
-        if(csoutdeleted!=0)
-            echohl WarningMsg | echo "Fail to do cscope! I cannot delete the cscope.out" | echohl None
-            return
-        endif
-    endif
-    if(executable('ctags'))
-        silent! execute "!ctags -R --c-types=+p --fields=+S *"
-        "silent! execute "!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q ."
-    endif
-    if(executable('cscope') && has("cscope") )
-        if(g:iswindows!=1)
-            silent! execute "!find . -name '*.h' -o -name '*.c' -o -name '*.cpp' -o -name '*.java' -o -name '*.cs' > cscope.files"
-        else
-            silent! execute "!dir /s/b *.c,*.cpp,*.h,*.java,*.cs >> cscope.files"
-        endif
-        silent! execute "!cscope -bRq"
-        execute "normal :"
-        if filereadable("cscope.out")
-            execute "cs add cscope.out"
-        endif
-    endif
-endfunction
-" ============================================================
-" END: For cscope
-" ============================================================
+" ref[1]: http://nvie.com/posts/how-i-boosted-my-vim/
+" ref[2]: https://github.com/gmarik/vundle
+" ref[3]: http://cscope.sourceforge.net/cscope_maps.vim
+" ref[4]: http://mirnazim.org/writings/vim-plugins-i-use/
+" ref[5]: https://github.com/gmarik/vundle/wiki/Examples
